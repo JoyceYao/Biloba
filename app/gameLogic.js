@@ -215,4 +215,10 @@ angular.module('myApp', []).factory('gameLogic', function() {
         }
         return true;
     }
+
+    return {
+        getInitialBoard: getInitialBoard,
+        createMove: createMove,
+        isMoveOk: isMoveOk
+    };
 });
