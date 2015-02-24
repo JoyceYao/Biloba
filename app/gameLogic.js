@@ -1,11 +1,11 @@
 'use strict';
 
-angular.module('myApp', []).factory('gameLogic', function() {
+angular.module('bilobaApp', []).factory('gameLogic', function() {
 
     function getInitialBoard() {
         return [
-            ['-', '-', '',  '',  'B', '',  '', '-',  '-'],
-            ['-', '',  '',  'B', 'B', 'B', '', '',   '-'],
+            ['-', '-', '',  '',  'B', '',  '',  '-', '-'],
+            ['-', '',  '',  'B', 'B', 'B', '',  '',  '-'],
             ['',  '',  'B', 'B', 'B', 'B', 'B', '',  '' ],
             ['',  'B', 'B', 'B', 'B', 'B', 'B', 'B', '' ],
             ['',  '',  '',  '',  '',  '',  '',  '',  '' ],
@@ -16,91 +16,114 @@ angular.module('myApp', []).factory('gameLogic', function() {
         ];
     }
 
-    function getPieceByTurn(turnIndex) {
-        return turnIndexBeforeMove === 0  ? 'B' : 'R';
+    function getPawnByTurn(turnIndex) {
+        return turnIndex === 0  ? 'B' : 'R';
     }
 
-    function getOppositePieceByTurn(turnIndex) {
-        return turnIndexBeforeMove === 0  ? 'R' : 'B';
+    function getOppositePawnByTurn(turnIndex) {
+        return turnIndex === 0  ? 'R' : 'B';
     }
 
-    function isTie(board) {
-        var pieceCount = [0, 0];
+    function getPawnCount(board) {
+        var pawnCount = [0, 0];
         for(var i = 0; i < 9; i++) {
             var row = board[i];
-            for(var j = 0; j < row.length; j++) {
-                if(row[j] === 'B') {
-                    pieceCount[0]++;
+            for(var j = 0; j < 9; j++) {
+                if(row[j] == 'B') {
+                    pawnCount[0]++;
                 }
-                else if(cell == 'R') {
-                    pieceCount[1]++;
+                else if(row[j] == 'R') {
+                    pawnCount[1]++;
                 }
             }
         }
+        return pawnCount;
+    }
 
-        if( ( pieceCount[0] < 3 && pieceCount[1] < 3 ) 
-            || ( pieceCount[0] < 3 && pieceCount[0] == pieceCount[1] ) ) {
+    function isTie(board) {
+        var pawnCount = getPawnCount(board);
+        if( ( pawnCount[0] < 3 && pawnCount[1] < 3 ) ) {
             return true;
         }
-
         return false;
     }
 
     function getWinner(board) {
-        var pieceCount = [0, 0],
-            boardString = '';
+        var pawnCount = getPawnCount(board);
 
-        for(var i = 0; i < 9; i++) {
-            var row = board[i];
-            for(var j = 0; j < row.length; j++) {
-                cell = row[j];
-                if(cell === 'B') {
-                    pieceCount[0]++;
-                }
-                else if(cell == 'R') {
-                    pieceCount[1]++;
-                }
-                boardString += (cell === '' ? ' ' : cell);
-            }
-        }
-
-        if( pieceCount[0] >= 3 && pieceCount[1] >= 3) {
+        if( pawnCount[0] >= 3 && pawnCount[1] >= 3 ) {
             return '';
         }
-        else if( pieceCount[0] >= 3 && pieceCount[1] < 3 ) {
+        else if( pawnCount[0] >= 3 && pawnCount[1] < 3 ) {
             return 'B';
         }
-        else if( pieceCount[1] >= 3 && pieceCount[0] < 3 ) {
+        else if( pawnCount[1] >= 3 && pawnCount[0] < 3 ) {
             return 'R';
         }
     }
 
-    function checkMove(board, from_row, from_col, to_row, to_row, turnIndex) {
-        var turnPiece = getPieceByTurn(turnIndex);
+/*    function getValidPositionsOnCapture(board, captures, turnIndex) {
+        var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ],
+            valid = {}, validPositions = [],
+            turnPawn = getPawnByTurn(turnIndex);
 
-        var row_delta = from_row - to_row,
-            col_delta = from_col - to_col,
-            row_delta_dir = (row_delta === 0) ? 0 : (row_delta/row_delta),
-            col_delta_dir = (col_delta === 0) ? 0 : (col_delta/col_delta);
+        for( var i = 0; i < DIRS.length; i++ ){
+            var dir = DIRS[i],
+                pRow = row + dir.r, pCol = col + dir.c,
+                nRow = row - dir.r, nCol = col - dir.c;
 
+            if( board[pRow] && board[pRow][pCol] === turnPawn ) {
+                valid[(pRow) + ':' + (pCol)] = {r: pRow, c: pCol};
+            }                
+            if( board[nRow] && board[nRow][nCol] === turnPawn ) {
+                valid[(nRow) + ':' + (nCol)] = {r: nRow, c: nCol};
+            }
+        }
 
-        if(Math.abs(row_delta) > 1 || Math.abs(col_delta > 1)) {
+        for(var k in valid) {
+            validPositions.push(valid[k]);
+        }
+
+        return validPositions;
+    }*/
+
+    function checkMoveSteps(board, from_row, from_col, to_row, to_col, turnIndex ) {
+
+        var row_delta = to_row - from_row,
+            col_delta = to_col - from_col,
+            row_delta_dir = (row_delta === 0) ? 0 : row_delta/Math.abs(row_delta),
+            col_delta_dir = (col_delta === 0) ? 0 : col_delta/Math.abs(col_delta),
+            jump_row = from_row + row_delta_dir,
+            jump_col = from_col + col_delta_dir;
+
+        if(Math.abs(row_delta) > 1 || Math.abs(col_delta) > 1) {
+            if(board[jump_row] && board[jump_row][jump_col] === getOppositePawnByTurn(turnIndex)) {
+                return true;
+            }
             return false;
         }
-        else if(board[to_row][to_col] == getOppositePieceByTurn(turnIndex) && board[to_row + row_delta_dir][to_col _ col_delta_dir] != turnPiece){
-            return false;
-        }
-
         return true;
     }
 
+    function checkMoveOnCapture(board, to_row, to_col, captures) {
+
+        for( var i = 0; i < captures.length; i++ ) {
+            var capture = captures[i];
+            if( to_row == capture.row && to_col == capture.col ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function isCaptured(board, row, col, turnIndex) {
+
         var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ];
-        var oppositePiece = getOppositePieceByTurn(turnIndex);
+        var oppositePawn = getOppositePawnByTurn(turnIndex);
 
         for( var i = 0; i < DIRS.length; i++ ){
             var dir = DIRS[i];
-            if(board[row + dir.r][col + dir.c] == oppositePiece && board[row - dir.r][col - dir.c] == oppositePiece) {
+            if( ( board[row + dir.r] && board[row + dir.r][col + dir.c] === oppositePawn ) && ( board[row - dir.r] && board[row - dir.r][col - dir.c] === oppositePawn ) ) {
                 return true;
             }
         }
@@ -110,71 +133,89 @@ angular.module('myApp', []).factory('gameLogic', function() {
 
     function willCapture(board, row, col, turnIndex) {
         var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ];
-        var turnPiece = getPieceByTurn(turnIndex),
-            oppositePiece = getOppositePieceByTurn(turnIndex),
+        var turnPawn = getPawnByTurn(turnIndex),
+            oppositePawn = getOppositePawnByTurn(turnIndex),
             captures = [];
 
         for(var i = 0; i < DIRS.length; i++ ){
             var dir = DIRS[i];
-            if(board[row + dir.r][col + dir.c] == oppositePiece && board[row + 2 * dir.r][col + 2 * dir.c] == turnPiece) {
-                captures.push({row: row + dir.r, col: col + dir.c})
+            if( ( board[row + dir.r] && board[row + dir.r][col + dir.c] === oppositePawn ) 
+                && ( board[row + 2 * dir.r] && board[row + 2 * dir.r][col + 2 * dir.c] === turnPawn ) ) {
+                captures.push({row: row + dir.r, col: col + dir.c});
             }
         }
 
         for(var i = 0; i < DIRS.length; i++ ){
             var dir = DIRS[i];
-            if(board[row - dir.r][col - dir.c] == oppositePiece && board[row - 2 * dir.r][col - 2 * dir.c] == turnPiece) {
-                captures.push({row: row + dir.r, col: col + dir.c})
+            if( ( board[row - dir.r] && board[row - dir.r][col - dir.c] === oppositePawn )
+                && ( board[row - 2 * dir.r] && board[row - 2 * dir.r][col - 2 * dir.c] === turnPawn ) ) {
+                captures.push({row: row - dir.r, col: col - dir.c});
             }
         }
 
         return captures;
     }
 
-    function createMove(board, from_row, from_col, to_row, to_col, turnIndexBeforeMove) {
-        if (board === undefined) {
+    function createMove(board, from_row, from_col, to_row, to_col, captures, turnIndexBeforeMove) {
+        if ( board === undefined ) {
             board = getInitialBoard();
         }
-        var turnPiece = getPieceByTurn(turnIndexBeforeMove);
+        var turnPawn = getPawnByTurn(turnIndexBeforeMove);
 
-        if(board[from_row][from_col] != turnPiece) {
+        if( board[from_row] === undefined || board[from_row][from_col] != turnPawn ) {
             throw new Error("One can only move his own pawn!");
         }
 
-        if (board[to_row][to_col] !== '' || board[to_row][to_col] !== getOppositePieceByTurn(turnIndexBeforeMove)) {
-            throw new Error("One can only make a move in an empty position or in a position containing an opponent's piece!");
+        if( board[to_row] === undefined || board[to_row][to_col] !== '' ) {
+            throw new Error("One can only make a move in an empty position.");
         }
 
-        if (getWinner(board) !== '' || isTie(board)) {
-            throw new Error("Can only make a move if the game is not over!");
+        if( getWinner(board) !== '' || isTie(board) ) {
+            throw new Error("One can only make a move if the game is not over!");
         }
 
-        if(!checkMove(board, from_row, from_col, to_row, to_row, turnIndexBeforeMove)) {
-            throw new Error("One Can only make a one step move to an opponent's piece if followed by one's own piece in the same direction.")
+        if( !checkMoveSteps(board, from_row, from_col, to_row, to_col, turnIndexBeforeMove) ) {
+            throw new Error("One can only make a one step move or jump once over opponent's pawn.");
         }
+      
+        if( captures && captures.length > 0 && !checkMoveOnCapture(board, to_row, to_col, captures) ) {
+            throw new Error("One can only move a pawn to a captured pawn.");
+        }
+
 
         var boardAfterMove = angular.copy(board),
-            captures = [],
-            changeTurn = false;
+            changeTurn = false,
+            firstOperation = {};
+
+        captures = [];
         boardAfterMove[from_row][from_col] = '';
 
-        if(!(to_row == 4 && to_col == 4)) { // Special board position. Player has to make another move.
+        if(!(to_row == 4 && to_col == 4)) { 
 
             if(isCaptured(board, to_row, to_col, turnIndexBeforeMove)) {
+                /** 
+                 * If the move results in capture of the moved pawn, remove it from
+                 * the board and change turn.
+                 */
                 boardAfterMove[to_row][to_col] = '';
-                captures = [{row: to_row, col_ to_col}];
+                captures = [ {row: to_row, col: to_col} ];
                 changeTurn = true;
             }
             else {
-                boardAfterMove[to_row][to_col] = turnPiece;
-                captures = willCapture(board, to_row, to_col, turnIndexBeforeMove);
-                if(!captures.length) {
+                boardAfterMove[to_row][to_col] = turnPawn;
+                captures = willCapture(boardAfterMove, to_row, to_col, turnIndexBeforeMove);
+                if( captures.length === 0 ) {
                     changeTurn = true;
+                }
+                else {
+                    for(var i = 0; i < captures.length; i++) {
+                        var cap = captures[i];
+                        boardAfterMove[cap.row][cap.col] = '';
+                    }
                 }
             }
 
             var winner = getWinner(boardAfterMove);
-            var firstOperation = {};
             if (winner !== '' || isTie(boardAfterMove)) {
                 // Game over.
                 firstOperation = {endMatch: {endMatchScores:
@@ -184,28 +225,34 @@ angular.module('myApp', []).factory('gameLogic', function() {
                 firstOperation = {setTurn: {turnIndex: 1 - turnIndexBeforeMove}};
             }
         }
+        else {
+            /** 
+             * Special board position. Player has to make another move and ignore all rules.
+             */
+        }
 
         return [firstOperation,
             {set: {key: 'board', value: boardAfterMove}},
-            {set: {key: 'delta', value: {from_row: from_row, from_col: from_col, to_row: to_row, to_col: to_col}}}
-            {set: {key: 'captures', value: captures}}];
+            {set: {key: 'delta', value: { from_row: from_row, from_col: from_col, to_row: to_row, to_col: to_col } } },
+            {set: {key: 'captures', value: captures } } ];
     }
 
     function isMoveOk(params) {
         var move = params.move;
         var turnIndexBeforeMove = params.turnIndexBeforeMove;
         var stateBeforeMove = params.stateBeforeMove;
-
         try {
 
             var deltaValue = move[2].set.value;
             var from_row = deltaValue.from_row,
                 from_col = deltaValue.from_col,
                 to_row = deltaValue.to_row,
-                to_col = deltaValue.to_col;
+                to_col = deltaValue.to_col,
+                captures = stateBeforeMove.captures || [],
+                board = stateBeforeMove.board;
 
-            var board = stateBeforeMove.board;
-            var expectedMove = createMove(board, from_row, from_col, to_row, to_col, turnIndexBeforeMove);
+            var expectedMove = createMove(board, from_row, from_col, to_row, to_col, captures, turnIndexBeforeMove);
+
             if (!angular.equals(move, expectedMove)) {
                 return false;
             }
