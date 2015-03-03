@@ -18,7 +18,23 @@ describe("In Biloba", function() {
       stateBeforeMove: stateBeforeMove,
       move: move})).toBe(false);
   }
+  
+  function expectTie(board) {
+    expect(_gameLogic.isTie(board)).toBe(true);
+  }
 
+  function expectWinnerB(board) {
+    expect(_gameLogic.getWinner(board)).toEqual('B');
+  }
+  
+  function expectIllegalCheckMoveStep(board, from_row, from_col, to_row, to_col, turnIndex) {
+    expect(_gameLogic.checkMoveSteps(board, from_row, from_col, to_row, to_col, turnIndex )).toBe(false);
+  }
+  
+  function expectIllegalCreateMove(board, from_row, from_col, to_row, to_col, captures, turnIndexBeforeMove) {
+	expect(_gameLogic.createMove(board, from_row, from_col, to_row, to_col, captures, turnIndexBeforeMove)).toThrow(new Error("One can only make a one step move or jump once over opponent's pawn."));
+  }
+  
   function getEmptyBoard() {
       return [
           ['-', '-', '',  '',  '',  '',  '',  '-', '-'],
@@ -223,6 +239,55 @@ describe("In Biloba", function() {
       ]
     );
 
+  });
+  
+   it("tie when each player has less than 3 pawns", function() {
+    var board = getEmptyBoard();
+    board[3][6] = 'R';
+    board[4][6] = 'B';
+	board[6][8] = 'R';
+    board[7][8] = 'B';
+
+    expectTie( board );
+  });
+  
+   it("when player blue is winner", function() {
+    var board = getEmptyBoard();
+    board[3][6] = 'R';
+    board[4][6] = 'B';
+	board[6][8] = 'R';
+    board[7][8] = 'B';
+	board[4][5] = 'B';
+    expectWinnerB(board);
+  });
+  
+  it("when the moving step is illegal", function() {
+    var board = getEmptyBoard();
+    board[3][6] = 'R';
+    board[4][6] = 'B';
+	board[6][8] = 'R';
+    board[7][8] = 'B';
+	board[4][5] = 'B';
+    expectIllegalCheckMoveStep(board, -8,5,-3,5,0);
+  });
+  
+  it("moving B when it's R's turn is illegal", function() {
+    var board = getEmptyBoard();
+    board[3][6] = 'R';
+    board[4][6] = 'B';
+	board[6][8] = 'R';
+    board[7][8] = 'B';
+	board[4][5] = 'B';
+	board[2][2] = 'R';
+	board[3][3] = 'R';
+
+    expectIllegalMove(0, {}, [
+        {setTurn: {turnIndex : 1}},
+        {set: {key: 'board', value: board}},
+        {set: {key: 'delta', value: {from_row: 4, from_col: 5, to_row: 1, to_col: 5} } },
+        {set: {key: 'captures', value: []}}
+      ]
+    );
   });
   
 });

@@ -266,6 +266,14 @@ angular.module('bilobaApp', []).factory('gameLogic', function() {
     return {
         getInitialBoard: getInitialBoard,
         createMove: createMove,
-        isMoveOk: isMoveOk
+        isMoveOk: isMoveOk,
+		isTie: isTie,
+		getWinner: getWinner,
+		checkMoveSteps: checkMoveSteps
     };
 });
+
+// Comment:
+// Bug: When B wins by capturing an R, and then moving to the R's previous location, 
+// there can be a case where R captures this moved B there by hypothetically creating 
+// a case where B actually doesnt win the game but the game ends up in a tie.
