@@ -62,6 +62,29 @@ angular.module('bilobaApp', []).factory('gameLogic', function() {
         }
     }
 
+    function getPossibleMoves(board, captures, turnIndexBeforeMove) {
+        var possibleMoves = [];
+        var i, j, k, l;
+        var turnPawn = getPawnByTurn(turnIndexBeforeMove);
+        for (i = 0; i < 9; i++) {
+            for (j = 0; j < 9; j++) {
+                if(board[i][j] == turnPawn) {
+                    for(k = 0; k < 9; k++) {
+                        for(l = 0; l < 9; l++) {
+                            try {
+                                possibleMoves.push(createMove(board, i, j, k, l, captures, turnIndexBeforeMove));
+                            } catch (e) {
+                                // The cell in that position is invalid.
+                            }                           
+                        }
+                    }
+                }
+
+            }
+        }
+        return possibleMoves;
+    }
+
 /*    function getValidPositionsOnCapture(board, captures, turnIndex) {
         var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ],
             valid = {}, validPositions = [],
@@ -266,6 +289,7 @@ angular.module('bilobaApp', []).factory('gameLogic', function() {
     return {
         getInitialBoard: getInitialBoard,
         createMove: createMove,
+        getPossibleMoves: getPossibleMoves,
         isMoveOk: isMoveOk,
 		isTie: isTie,
 		getWinner: getWinner,
@@ -273,7 +297,10 @@ angular.module('bilobaApp', []).factory('gameLogic', function() {
     };
 });
 
-// Comment:
-// Bug: When B wins by capturing an R, and then moving to the R's previous location, 
-// there can be a case where R captures this moved B there by hypothetically creating 
-// a case where B actually doesnt win the game but the game ends up in a tie.
+/** TODO
+
+    [BUG] When B wins by capturing an R, and then moving to the R's previous location, 
+    there can be a case where R captures this moved B there by hypothetically creating 
+    a case where B actually doesnt win the game but the game ends up in a tie.
+
+*/
