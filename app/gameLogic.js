@@ -1,6 +1,6 @@
-'use strict';
+angular.module('myApp', []).factory('gameLogic', function() {
 
-angular.module('bilobaApp', []).factory('gameLogic', function() {
+    'use strict';
 
     function getInitialBoard() {
         return [
@@ -85,30 +85,34 @@ angular.module('bilobaApp', []).factory('gameLogic', function() {
         return possibleMoves;
     }
 
-/*    function getValidPositionsOnCapture(board, captures, turnIndex) {
+    function getValidPositionsOnCapture(board, captures, turnIndex) {
         var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ],
             valid = {}, validPositions = [],
             turnPawn = getPawnByTurn(turnIndex);
 
-        for( var i = 0; i < DIRS.length; i++ ){
-            var dir = DIRS[i],
-                pRow = row + dir.r, pCol = col + dir.c,
-                nRow = row - dir.r, nCol = col - dir.c;
+        for(var j = 0; j < captures.length; j++ ){
+            var row = captures[j].row, col = captures[j].col;
+            for( var i = 0; i < DIRS.length; i++ ){
+                var dir = DIRS[i],
+                    pRow = row + dir.r, pCol = col + dir.c,
+                    nRow = row - dir.r, nCol = col - dir.c;
 
-            if( board[pRow] && board[pRow][pCol] === turnPawn ) {
-                valid[(pRow) + ':' + (pCol)] = {r: pRow, c: pCol};
-            }                
-            if( board[nRow] && board[nRow][nCol] === turnPawn ) {
-                valid[(nRow) + ':' + (nCol)] = {r: nRow, c: nCol};
-            }
+                if( board[pRow] && board[pRow][pCol] === turnPawn ) {
+                    valid[(pRow) + ':' + (pCol)] = {row: pRow, col: pCol};
+                }                
+                if( board[nRow] && board[nRow][nCol] === turnPawn ) {
+                    valid[(nRow) + ':' + (nCol)] = {row: nRow, col: nCol};
+                }
+            }            
         }
+
 
         for(var k in valid) {
             validPositions.push(valid[k]);
         }
 
         return validPositions;
-    }*/
+    }
 
     function checkMoveSteps(board, from_row, from_col, to_row, to_col, turnIndex ) {
 
@@ -189,6 +193,10 @@ angular.module('bilobaApp', []).factory('gameLogic', function() {
             throw new Error("One can only move his own pawn!");
         }
 
+        if(board[4][4] == turnPawn && from_row != 4 && from_col != 4) {
+            throw new Error("One can only move his own pawn from the center block!");
+        }
+
         if( board[to_row] === undefined || board[to_row][to_col] !== '' ) {
             throw new Error("One can only make a move in an empty position.");
         }
@@ -247,11 +255,13 @@ angular.module('bilobaApp', []).factory('gameLogic', function() {
                 // Game continues. Now it's the opponent's turn (the turn switches from 0 to 1 and 1 to 0).
                 firstOperation = {setTurn: {turnIndex: 1 - turnIndexBeforeMove}};
             }
+            else {
+                firstOperation = {setTurn: {turnIndex: turnIndexBeforeMove}};    
+            }
         }
         else {
-            /** 
-             * Special board position. Player has to make another move and ignore all rules.
-             */
+            firstOperation = {setTurn: {turnIndex: turnIndexBeforeMove}};
+            boardAfterMove[4][4] = turnPawn;
         }
 
         return [firstOperation,
@@ -275,7 +285,6 @@ angular.module('bilobaApp', []).factory('gameLogic', function() {
                 board = stateBeforeMove.board;
 
             var expectedMove = createMove(board, from_row, from_col, to_row, to_col, captures, turnIndexBeforeMove);
-
             if (!angular.equals(move, expectedMove)) {
                 return false;
             }
@@ -293,14 +302,8 @@ angular.module('bilobaApp', []).factory('gameLogic', function() {
         isMoveOk: isMoveOk,
 		isTie: isTie,
 		getWinner: getWinner,
-		checkMoveSteps: checkMoveSteps
+		checkMoveSteps: checkMoveSteps,
+        getPawnByTurn: getPawnByTurn,
+        getValidPositionsOnCapture: getValidPositionsOnCapture
     };
 });
-
-/** TODO
-
-    [BUG] When B wins by capturing an R, and then moving to the R's previous location, 
-    there can be a case where R captures this moved B there by hypothetically creating 
-    a case where B actually doesnt win the game but the game ends up in a tie.
-
-*/
