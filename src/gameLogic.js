@@ -29,10 +29,10 @@ angular.module('myApp', []).factory('gameLogic', function() {
         for(var i = 0; i < 9; i++) {
             var row = board[i];
             for(var j = 0; j < 9; j++) {
-                if(row[j] == 'B') {
+                if(row[j] === 'B') {
                     pawnCount[0]++;
                 }
-                else if(row[j] == 'R') {
+                else if(row[j] === 'R') {
                     pawnCount[1]++;
                 }
             }
@@ -42,15 +42,18 @@ angular.module('myApp', []).factory('gameLogic', function() {
 
     function isTie(board) {
         var pawnCount = getPawnCount(board);
-        if( ( pawnCount[0] < 3 && pawnCount[1] < 3 ) ) {
+        if( pawnCount[0] < 3 && pawnCount[1] < 3 ) {
             return true;
         }
         return false;
     }
 
-    function getWinner(board) {
-        var pawnCount = getPawnCount(board);
+    function getWinner(board, captures) {
+        if(captures.length > 0) {
+            return '';
+        }
 
+        var pawnCount = getPawnCount(board);
         if( pawnCount[0] >= 3 && pawnCount[1] >= 3 ) {
             return '';
         }
@@ -68,11 +71,15 @@ angular.module('myApp', []).factory('gameLogic', function() {
         var turnPawn = getPawnByTurn(turnIndexBeforeMove);
         for (i = 0; i < 9; i++) {
             for (j = 0; j < 9; j++) {
-                if(board[i][j] == turnPawn) {
-                    for(k = 0; k < 9; k++) {
-                        for(l = 0; l < 9; l++) {
+                if(board[i][j] === turnPawn) {
+                    var iMin = Math.max(i - 2, 0), iMax = Math.min(i + 2, 8);
+                    var jMin = Math.max(j - 2, 0), jMax = Math.min(j + 2, 8);
+                    for(k = iMin; k <= iMax; k++) {
+                        for(l = jMin; l <= jMax; l++) {
                             try {
-                                possibleMoves.push(createMove(board, i, j, k, l, captures, turnIndexBeforeMove));
+                                var move = createMove(board, i, j, k, l, captures, turnIndexBeforeMove);
+                                console.log(i, j, k, l);
+                                possibleMoves.push(move);
                             } catch (e) {
                                 // The cell in that position is invalid.
                             }                           
@@ -98,17 +105,19 @@ angular.module('myApp', []).factory('gameLogic', function() {
                     nRow = row - dir.r, nCol = col - dir.c;
 
                 if( board[pRow] && board[pRow][pCol] === turnPawn ) {
-                    valid[(pRow) + ':' + (pCol)] = {row: pRow, col: pCol};
+                    valid[pRow + ':' + pCol] = {row: pRow, col: pCol};
                 }                
                 if( board[nRow] && board[nRow][nCol] === turnPawn ) {
-                    valid[(nRow) + ':' + (nCol)] = {row: nRow, col: nCol};
+                    valid[nRow + ':' + nCol] = {row: nRow, col: nCol};
                 }
             }            
         }
 
 
         for(var k in valid) {
-            validPositions.push(valid[k]);
+            if(valid.hasOwnProperty(k)) {
+                validPositions.push(valid[k]);    
+            }
         }
 
         return validPositions;
@@ -118,14 +127,18 @@ angular.module('myApp', []).factory('gameLogic', function() {
 
         var row_delta = to_row - from_row,
             col_delta = to_col - from_col,
-            row_delta_dir = (row_delta === 0) ? 0 : row_delta/Math.abs(row_delta),
-            col_delta_dir = (col_delta === 0) ? 0 : col_delta/Math.abs(col_delta),
+            row_delta_dir = row_delta === 0 ? 0 : row_delta/Math.abs(row_delta),
+            col_delta_dir = col_delta === 0 ? 0 : col_delta/Math.abs(col_delta),
             jump_row = from_row + row_delta_dir,
             jump_col = from_col + col_delta_dir;
 
         if(Math.abs(row_delta) > 1 || Math.abs(col_delta) > 1) {
-            if(board[jump_row] && board[jump_row][jump_col] === getOppositePawnByTurn(turnIndex)) {
-                return true;
+            var sum_delta = row_delta + col_delta;
+            if(sum_delta <= 4 && sum_delta % 2 === 0) {
+                if(board[jump_row] && board[jump_row][jump_col] === getOppositePawnByTurn(turnIndex)) {
+                    return true;
+                }
+                return false;                
             }
             return false;
         }
@@ -136,7 +149,7 @@ angular.module('myApp', []).factory('gameLogic', function() {
 
         for( var i = 0; i < captures.length; i++ ) {
             var capture = captures[i];
-            if( to_row == capture.row && to_col == capture.col ) {
+            if( to_row === capture.row && to_col === capture.col ) {
                 return true;
             }
         }
@@ -150,7 +163,7 @@ angular.module('myApp', []).factory('gameLogic', function() {
 
         for( var i = 0; i < DIRS.length; i++ ){
             var dir = DIRS[i];
-            if( ( board[row + dir.r] && board[row + dir.r][col + dir.c] === oppositePawn ) && ( board[row - dir.r] && board[row - dir.r][col - dir.c] === oppositePawn ) ) {
+            if( board[row + dir.r] && board[row + dir.r][col + dir.c] === oppositePawn && board[row - dir.r] && board[row - dir.r][col - dir.c] === oppositePawn ) {
                 return true;
             }
         }
@@ -162,20 +175,20 @@ angular.module('myApp', []).factory('gameLogic', function() {
         var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ];
         var turnPawn = getPawnByTurn(turnIndex),
             oppositePawn = getOppositePawnByTurn(turnIndex),
-            captures = [];
+            captures = [], i, dir;
 
-        for(var i = 0; i < DIRS.length; i++ ){
-            var dir = DIRS[i];
-            if( ( board[row + dir.r] && board[row + dir.r][col + dir.c] === oppositePawn ) 
-                && ( board[row + 2 * dir.r] && board[row + 2 * dir.r][col + 2 * dir.c] === turnPawn ) ) {
+        for(i = 0; i < DIRS.length; i++ ){
+            dir = DIRS[i];
+            if( board[row + dir.r] && board[row + dir.r][col + dir.c] === oppositePawn && 
+                board[row + 2 * dir.r] && board[row + 2 * dir.r][col + 2 * dir.c] === turnPawn ) {
                 captures.push({row: row + dir.r, col: col + dir.c});
             }
         }
 
-        for(var i = 0; i < DIRS.length; i++ ){
-            var dir = DIRS[i];
-            if( ( board[row - dir.r] && board[row - dir.r][col - dir.c] === oppositePawn )
-                && ( board[row - 2 * dir.r] && board[row - 2 * dir.r][col - 2 * dir.c] === turnPawn ) ) {
+        for(i = 0; i < DIRS.length; i++ ){
+            dir = DIRS[i];
+            if( board[row - dir.r] && board[row - dir.r][col - dir.c] === oppositePawn && 
+                board[row - 2 * dir.r] && board[row - 2 * dir.r][col - 2 * dir.c] === turnPawn ) {
                 captures.push({row: row - dir.r, col: col - dir.c});
             }
         }
@@ -189,19 +202,18 @@ angular.module('myApp', []).factory('gameLogic', function() {
         }
         var turnPawn = getPawnByTurn(turnIndexBeforeMove);
 
-        if( board[from_row] === undefined || board[from_row][from_col] != turnPawn ) {
+        if( board[from_row] === undefined || board[from_row][from_col] !== turnPawn ) {
             throw new Error("One can only move his own pawn!");
         }
 
-        if(board[4][4] == turnPawn && from_row != 4 && from_col != 4) {
+        if(board[4][4] === turnPawn && from_row !== 4 && from_col !== 4) {
             throw new Error("One can only move his own pawn from the center block!");
         }
 
         if( board[to_row] === undefined || board[to_row][to_col] !== '' ) {
             throw new Error("One can only make a move in an empty position.");
         }
-
-        if( getWinner(board) !== '' || isTie(board) ) {
+        if( getWinner(board, captures) !== '' || isTie(board) ) {
             throw new Error("One can only make a move if the game is not over!");
         }
 
@@ -221,7 +233,7 @@ angular.module('myApp', []).factory('gameLogic', function() {
         captures = [];
         boardAfterMove[from_row][from_col] = '';
 
-        if(!(to_row == 4 && to_col == 4)) { 
+        if(!(to_row === 4 && to_col === 4)) { 
 
             if(isCaptured(board, to_row, to_col, turnIndexBeforeMove)) {
                 /** 
@@ -246,11 +258,11 @@ angular.module('myApp', []).factory('gameLogic', function() {
                 }
             }
 
-            var winner = getWinner(boardAfterMove);
+            var winner = getWinner(boardAfterMove, captures);
             if (winner !== '' || isTie(boardAfterMove)) {
                 // Game over.
                 firstOperation = {endMatch: {endMatchScores:
-                (winner === 'R' ? [1, 0] : (winner === 'B' ? [0, 1] : [0, 0]))}};
+                winner === 'R' ? [1, 0] : winner === 'B' ? [0, 1] : [0, 0] }};
             } else if(changeTurn) {
                 // Game continues. Now it's the opponent's turn (the turn switches from 0 to 1 and 1 to 0).
                 firstOperation = {setTurn: {turnIndex: 1 - turnIndexBeforeMove}};
@@ -286,9 +298,11 @@ angular.module('myApp', []).factory('gameLogic', function() {
 
             var expectedMove = createMove(board, from_row, from_col, to_row, to_col, captures, turnIndexBeforeMove);
             if (!angular.equals(move, expectedMove)) {
+                //console.log(move[1], expectedMove[1]);
                 return false;
             }
         } catch (e) {
+           // console.log(e.message);
             // if there are any exceptions then the move is illegal
             return false;
         }

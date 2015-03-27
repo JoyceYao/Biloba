@@ -1,6 +1,6 @@
 angular.module('myApp').controller('gameController',
-    ['$scope', '$log', '$timeout', 'gameService', 'gameLogic', 'resizeGameAreaService',
-    function ($scope, $log, $timeout, gameService, gameLogic, resizeGameAreaService) {
+    ['$scope', '$log', '$timeout', 'gameService', 'stateService', 'gameLogic', 'resizeGameAreaService',
+    function ($scope, $log, $timeout, gameService, stateService, gameLogic, resizeGameAreaService) {
 
     'use strict';
 
@@ -24,10 +24,12 @@ angular.module('myApp').controller('gameController',
                 $scope.rotate = false;
             }
         }
+
         if($scope.captures.length > 0) {
             var valid = gameLogic.getValidPositionsOnCapture($scope.board, $scope.captures, params.turnIndexAfterMove);
             $scope.selectedBlock = { row: valid[0].row, col: valid[0].col };
         }
+        
         $scope.isYourTurn = params.turnIndexAfterMove >= 0 && // game is ongoing
         params.yourPlayerIndex === params.turnIndexAfterMove; // it's my turn
         $scope.turnIndex = params.turnIndexAfterMove;
@@ -41,6 +43,8 @@ angular.module('myApp').controller('gameController',
         }
     }
 
+    window.e2e_test_stateService = stateService;
+
     $scope.cellClicked = function (row, col) {
         $log.info(["Clicked on cell:", row, col]);
         if (window.location.search === '?throwException') { // to test encoding a stack trace with sourcemap
@@ -48,7 +52,9 @@ angular.module('myApp').controller('gameController',
         }
 
         if( $scope.board[row][col] === gameLogic.getPawnByTurn($scope.turnIndex) ) {
-            if($scope.selectedBlock && ($scope.selectedBlock.row == 4 && $scope.selectedBlock.col)) return;
+            if($scope.selectedBlock && $scope.selectedBlock.row === 4 && $scope.selectedBlock.col) { 
+                return;
+            }
             $scope.selectedBlock = { row: row, col: col };
         }
         else {
@@ -56,7 +62,7 @@ angular.module('myApp').controller('gameController',
                 try {
                     var from = $scope.selectedBlock;
                     var move = gameLogic.createMove($scope.board, from.row, from.col, row, col, $scope.captures, $scope.turnIndex);
-                    if(row == 4 && col == 4){
+                    if(row === 4 && col === 4){
                         $scope.selectedBlock = { row: 4, col: 4 };
                     }
                     else {
@@ -78,7 +84,7 @@ angular.module('myApp').controller('gameController',
             col = 8 - col;
         }
         return $scope.board[row][col];
-    }
+    };
 
     gameService.setGame({
         gameDeveloperEmail: "jugalm9@gmail.com",
