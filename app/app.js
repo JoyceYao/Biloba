@@ -18,6 +18,11 @@ angular.module('myApp').controller('gameController',
         $scope.captures = params.stateAfterMove.captures || [];
         if ($scope.board === undefined) {
             $scope.board = gameLogic.getInitialBoard();
+            if (params.playMode === "playBlack") {
+                $scope.rotate = true;
+            } else {
+                $scope.rotate = false;
+            }
         }
         if($scope.captures.length > 0) {
             var valid = gameLogic.getValidPositionsOnCapture($scope.board, $scope.captures, params.turnIndexAfterMove);
@@ -68,6 +73,10 @@ angular.module('myApp').controller('gameController',
     };
 
     $scope.getPiece = function(row, col) {
+        if($scope.rotate) {
+            row = 8 - row;
+            col = 8 - col;
+        }
         return $scope.board[row][col];
     }
 

@@ -17,11 +17,11 @@ angular.module('myApp', []).factory('gameLogic', function() {
     }
 
     function getPawnByTurn(turnIndex) {
-        return turnIndex === 0  ? 'B' : 'R';
+        return turnIndex === 0  ? 'R' : 'B';
     }
 
     function getOppositePawnByTurn(turnIndex) {
-        return turnIndex === 0  ? 'R' : 'B';
+        return turnIndex === 0  ? 'B' : 'R';
     }
 
     function getPawnCount(board) {
@@ -250,7 +250,7 @@ angular.module('myApp', []).factory('gameLogic', function() {
             if (winner !== '' || isTie(boardAfterMove)) {
                 // Game over.
                 firstOperation = {endMatch: {endMatchScores:
-                (winner === 'B' ? [1, 0] : (winner === 'R' ? [0, 1] : [0, 0]))}};
+                (winner === 'R' ? [1, 0] : (winner === 'B' ? [0, 1] : [0, 0]))}};
             } else if(changeTurn) {
                 // Game continues. Now it's the opponent's turn (the turn switches from 0 to 1 and 1 to 0).
                 firstOperation = {setTurn: {turnIndex: 1 - turnIndexBeforeMove}};
