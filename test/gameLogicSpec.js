@@ -25,7 +25,6 @@ describe("In Biloba", function() {
 	function expectTie(board) {
 		expect(_gameLogic.isTie(board)).toBe(true);
 	}
-
 	
 	function expectIllegalCheckMoveStep(board, from_row, from_col, to_row, to_col, turnIndex) {
 		expect(_gameLogic.checkMoveSteps(board, from_row, from_col, to_row, to_col, turnIndex )).toBe(false);
@@ -330,6 +329,61 @@ describe("In Biloba", function() {
 			{set: {key: 'captures', value: [{row: 3, col: 7}]}}
 			]
 		);
+	});
+
+
+	it("allows only R pawns as valid from positions when it's R\'s turn.", function() {
+		var board = _gameLogic.getInitialBoard(),
+			expected = [];
+		for( var i = 0; i < 9; i++ ) {
+			for( var j = 0; j < 9; j++ ) {
+				if(board[i][j] === 'R') {
+					expected.push({row: i, col: j});
+				}
+			}
+		}
+		expect(_gameLogic.getValidFromPositions(board, [], 0)).toEqual(expected);
+	});
+
+	it("allows only B pawns as valid from positions when it's B\'s turn.", function() {
+		var board = _gameLogic.getInitialBoard(),
+			expected = [];
+		for( var i = 0; i < 9; i++ ) {
+			for( var j = 0; j < 9; j++ ) {
+				if(board[i][j] === 'B') {
+					expected.push({row: i, col: j});
+				}
+			}
+		}
+		expect(_gameLogic.getValidFromPositions(board, [], 1)).toEqual(expected);
+	});
+
+	it("allows only R at 4x4 as a valid from position when it is R\'s turn and an R is present at 4x4.", function() {
+		var board = _gameLogic.getInitialBoard();
+		board[4][4] = board[5][4];
+		board[5][4] = '';
+		expect(_gameLogic.getValidFromPositions(board, [], 0)).toEqual([{row: 4, col: 4}]);
+	});
+
+	it("allows an R at 5x4 in the intial board to move into only three valid positions within reach in row 4.", function() {
+		var board = _gameLogic.getInitialBoard();
+		expect(_gameLogic.getValidToPositions(board, 5, 4, [], 0)).toEqual([
+			{row: 4, col: 3},
+			{row: 4, col: 4},
+			{row: 4, col: 5}
+		]);
+	});
+
+	it("allows only four adjacent R\'s as valid from positions when a B is captured between them.", function() {
+		var board = _gameLogic.getInitialBoard();
+		board[4][5] = board[5][5];
+		board[5][5] = board[3][5] = '';
+		expect(_gameLogic.getValidFromPositions(board, [{row:5, col:5}], 0)).toEqual([
+			{row: 5, col: 6},
+			{row: 5, col: 4},
+			{row: 6, col: 5},
+			{row: 4, col: 5},
+		]);
 	});
 	
 });

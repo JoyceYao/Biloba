@@ -3,16 +3,19 @@
     float:left;
     width: 35px;
     height: 35px;
-    transition: background-color 0.1s linear;
+    -webkit-transition:0.1s linear background;
+    -moz-transition:0.1s linear background;
+    -o-transition:0.1s linear background;
+    transition:0.1s linear background;
 }
 
-.block:hover {
+.block.valid:hover {
     background-color: #f4f4f4;
     z-index: 99;
 }
 
-.block:focus, .block:active {
-    background-color: #eee;
+.block.valid:focus, .block.valid:active {
+    background-color: #ddd;
     box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
     z-index: 99;    
 }
@@ -21,14 +24,56 @@
     background-color: #aaa;
 }
 
-.block.selected, .block.center.selected {
+.block.selected, .block.center.selected, .block.selected:hover {
     background-color: #FFEAA6;
     border-color: #FFEAA6;
     z-index: 99;
 }
 
+.block.selected:focus, .block.selected:active {
+    background-color: #FFE180;  
+}
+
 .block.center{
     background-color: #2ecc71;
+}
+
+.block .piece{
+    opacity: 0.3;
+}
+
+.block.valid .piece{
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.block.validTo {
+    background-color: #E6F1FF;
+}
+
+.block.validTo:hover {
+    background-color: #ABD2FF;    
+}
+
+.block.center.validTo{
+    background-color: #7EEDAE;
+}
+
+.block.validTo:focus, .block.validTo:active {
+    background-color: #9EC0E8;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
+    z-index: 99;    
+}
+
+.block.captured .piece {
+    width: 0%;
+    height: 0%;
+    top: 50%;
+    left: 50%;
+    -webkit-animation:1s anim_capture;
+    -moz-animation:1s anim_capture;
+    -o-animation:1s anim_capture;
+    animation:1s anim_capture;
 }
 
 .piece {
@@ -38,12 +83,42 @@
     position: absolute;
     top: 15%;
     left: 15%;
+    -webkit-transition:0.1s linear all;
+    -moz-transition:0.1s linear all;
+    -o-transition:0.1s linear all;
+    transition:0.1s linear all;
 }
 
-.piece.B {
+.piece.B, .B .piece {
     background-color: #000;
 }
 
-.piece.R {
+.piece.R, .R .piece {
     background-color: #e74c3c;
+}
+
+
+@-webkit-keyframes anim_capture {
+    from {     
+        width: 70%;
+        height: 70%;
+        top: 15%;
+        left: 15%;
+    }
+    to {     
+        width: 0%;
+        height: 0%;
+        top: 50%;
+        left: 50%;
+    }
+}
+
+@-moz-keyframes my_animation {
+  from { opacity:1; }
+  to { opacity:0; }
+}
+
+@-o-keyframes my_animation {
+  from { opacity:1; }
+  to { opacity:0; }
 }
