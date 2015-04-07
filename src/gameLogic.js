@@ -29,10 +29,10 @@ angular.module('myApp', []).factory('gameLogic', function() {
         for(var i = 0; i < 9; i++) {
             var row = board[i];
             for(var j = 0; j < 9; j++) {
-                if(row[j] === 'B') {
+                if(row[j] === 'R') {
                     pawnCount[0]++;
                 }
-                else if(row[j] === 'R') {
+                else if(row[j] === 'B') {
                     pawnCount[1]++;
                 }
             }
@@ -48,12 +48,19 @@ angular.module('myApp', []).factory('gameLogic', function() {
         return false;
     }
 
-    function getWinner(board, captures) {
+    function getWinner(board, captures, turnIndex) {
+        var pawnCount = getPawnCount(board);
         if(captures.length > 0) {
+            if(pawnCount[1 - turnIndex] < 3) {
+                for(var i = 0; i < captures.length; i++) {
+                    if(!isCaptured(board, captures[i].row, captures[i].col, turnIndex)) {
+                        return getPawnByTurn(turnIndex);
+                    }                
+                }                
+            }
             return '';
         }
 
-        var pawnCount = getPawnCount(board);
         if( pawnCount[0] >= 3 && pawnCount[1] >= 3 ) {
             return '';
         }
@@ -134,6 +141,17 @@ angular.module('myApp', []).factory('gameLogic', function() {
         }
 
         return validPositions;
+    }
+
+    function isValidFromPosition(board, row, col, captures, turnIndex) {
+        var validPositions = getValidFromPositions(board, captures, turnIndex);
+        for(var i = 0; i < validPositions.length; i++) {
+            var valid = validPositions[i];
+            if(row === valid.row && col === valid.col) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function getValidToPositions(board, row, col, captures, turnIndex) {
@@ -238,8 +256,12 @@ angular.module('myApp', []).factory('gameLogic', function() {
         if( board[to_row] === undefined || board[to_row][to_col] !== '' ) {
             throw new Error("One can only make a move in an empty position.");
         }
-        if( getWinner(board, captures) !== '' || isTie(board) ) {
+        if( getWinner(board, captures, turnIndexBeforeMove) !== '' || isTie(board) ) {
             throw new Error("One can only make a move if the game is not over!");
+        }
+
+        if(!isValidFromPosition(board, from_row, from_col, captures, turnIndexBeforeMove)) {
+            throw new Error("One can only capture using one of the capturing pawns.");    
         }
 
         if( !checkMoveSteps(board, from_row, from_col, to_row, to_col, turnIndexBeforeMove) ) {
@@ -283,7 +305,7 @@ angular.module('myApp', []).factory('gameLogic', function() {
                 }
             }
 
-            var winner = getWinner(boardAfterMove, captures);
+            var winner = getWinner(boardAfterMove, captures, turnIndexBeforeMove);
             if (winner !== '' || isTie(boardAfterMove)) {
                 // Game over.
                 firstOperation = {endMatch: {endMatchScores:

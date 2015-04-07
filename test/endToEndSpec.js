@@ -156,19 +156,6 @@ describe('Biloba', function() {
     ];
     var captures3 = [{row: 3, col: 7}];
 
-    var delta4 = { from_row: 4, from_col: 7, to_row: 3, to_col: 7 };
-    var board4 = [
-        ['-', '-', '',  '',  '',   '',   '',   '-',  '-' ],
-        ['-', '',  '',  '',  '',   'B',  '',   '',   '-' ],
-        ['',  '',  '',  '',  '',   'B',  '',   'R',  ''  ],
-        ['',  '',  '',  '',  'R',  'R',  '',   'R',  ''  ],
-        ['',  '',  '',  '',  '',   '',   '',   '',   ''  ],
-        ['',  '',  '',  '',  '',   '',   '',   '',   ''  ],
-        ['',  '',  '',  '',  '',   '',   '',   '',   ''  ],
-        ['-', '',  '',  '',  '',   '',   '',   '',   '-' ],
-        ['-', '-', '',  '',  '',   '',   '',   '-',  '-' ]
-    ];
-    var captures4 = [];
 
     var matchState1 = {
         turnIndexBeforeMove: 1,
@@ -189,11 +176,11 @@ describe('Biloba', function() {
         turnIndex: -2,
         endMatchScores: [1, 0],
         lastMove: [{endMatch: {endMatchScores: [1, 0]}},
-            {set: {key: 'board', value: board4}},
-            {set: {key: 'delta', value: delta4}},
-            {set: {key: 'captures', value: captures4}}],
-        lastState: {board: board3, delta: delta3, captures: captures3},
-        currentState: {board: board4, delta: delta4, captures: captures4},
+            {set: {key: 'board', value: board3}},
+            {set: {key: 'delta', value: delta3}},
+            {set: {key: 'captures', value: captures3}}],
+        lastState: {board: board2, delta: delta2, captures: captures2},
+        currentState: {board: board3, delta: delta3, captures: captures3},
         lastVisibleTo: {},
         currentVisibleTo: {},
     };
@@ -202,10 +189,6 @@ describe('Biloba', function() {
         setMatchState(matchState1, 'passAndPlay');
         expectBoard(board2);
         clickDivsAndExpectPiece({row: 3, col: 6}, {row: 4, col: 7}, 'R');   // Winning click
-        expectBoard(board3);
-        clickDivsAndExpectPiece({row: 4, col: 7}, {row: 3, col: 7}, 'R');   // Move to capture location.
-        expectBoard(board4);
-        clickDivsAndExpectPiece({row: 2, col: 5}, {row: 4, col: 5}, '');    // Can't move B after game is won.
     });
 
     it('cannot play if it is not your turn', function () {
@@ -216,9 +199,9 @@ describe('Biloba', function() {
     });
 
 
-    it('can start from a match that ended', function () {
+    it('can\'t start from a match that ended', function () {
         setMatchState(matchState2, 'passAndPlay');
-        expectBoard(board4);
+        expectBoard(board3);
         clickDivsAndExpectPiece({row: 2, col: 5}, {row: 4, col: 5}, '');   // Can't move B after game ended.
     });
 });

@@ -209,23 +209,10 @@ describe("In Biloba", function() {
 
 		expectMoveOk(0,
 			{ board: board, captures: [] },
-			[ {setTurn: {turnIndex : 0}},
+			[ {endMatch: {endMatchScores : [1, 0]}},
 				{set: {key: 'board', value: boardAfterMove}},
 				{set: {key: 'delta', value: {from_row: 3, from_col: 7, to_row: 4, to_col: 6} } },
 				{set: {key: 'captures', value: [{row: 3, col: 6}]}}
-			]
-		);
-
-		var boardAfterMove2 = angular.copy(boardAfterMove);
-		boardAfterMove2[4][6] = '';
-		boardAfterMove2[3][6] = 'R';
-
-		expectMoveOk(0,
-			{ board: boardAfterMove, captures: [{row: 3, col: 6}] },
-			[ {endMatch: {endMatchScores: [1, 0]}},
-				{set: {key: 'board', value: boardAfterMove2}},
-				{set: {key: 'delta', value: {from_row: 4, from_col: 6, to_row: 3, to_col: 6} } },
-				{set: {key: 'captures', value: []}}
 			]
 		);
 

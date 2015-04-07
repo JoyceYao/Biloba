@@ -28,18 +28,25 @@
   }
 
   function handleEvent(event, type, clientX, clientY) {
-    event.preventDefault();
-    handleDragEvent(type, clientX, clientY);
+    event.preventDefault(); // Prevents generating mouse events for touch.
+    handleDragEvent(type, clientX, clientY, event);
   }
 
-  document.addEventListener("touchstart", touchHandler, true);
-  document.addEventListener("touchmove", touchHandler, true);
-  document.addEventListener("touchend", touchHandler, true);
-  document.addEventListener("touchcancel", touchHandler, true);
-  document.addEventListener("touchleave", touchHandler, true);
-  document.addEventListener("mousedown", mouseDownHandler, true);
-  document.addEventListener("mousemove", mouseMoveHandler, true);
-  document.addEventListener("mouseup", mouseUpHandler, true);
+  window.addEventListener("load", function () {
+    var gameArea = document.getElementById("gameArea");
+    if (!gameArea) {
+      throw new Error("You must have <div id='gameArea'>...</div>");
+    }
+    gameArea.addEventListener("touchstart", touchHandler, true);
+    gameArea.addEventListener("touchmove", touchHandler, true);
+    gameArea.addEventListener("touchend", touchHandler, true);
+    gameArea.addEventListener("touchcancel", touchHandler, true);
+    gameArea.addEventListener("touchleave", touchHandler, true);
+    gameArea.addEventListener("mousedown", mouseDownHandler, true);
+    gameArea.addEventListener("mousemove", mouseMoveHandler, true);
+    gameArea.addEventListener("mouseup", mouseUpHandler, true);
+  }, false );
+  
 })();;angular.module('myApp', []).factory('gameLogic', function() {
 
     'use strict';
@@ -71,10 +78,10 @@
         for(var i = 0; i < 9; i++) {
             var row = board[i];
             for(var j = 0; j < 9; j++) {
-                if(row[j] === 'B') {
+                if(row[j] === 'R') {
                     pawnCount[0]++;
                 }
-                else if(row[j] === 'R') {
+                else if(row[j] === 'B') {
                     pawnCount[1]++;
                 }
             }
@@ -90,12 +97,19 @@
         return false;
     }
 
-    function getWinner(board, captures) {
+    function getWinner(board, captures, turnIndex) {
+        var pawnCount = getPawnCount(board);
         if(captures.length > 0) {
+            if(pawnCount[1 - turnIndex] < 3) {
+                for(var i = 0; i < captures.length; i++) {
+                    if(!isCaptured(board, captures[i].row, captures[i].col, turnIndex)) {
+                        return getPawnByTurn(turnIndex);
+                    }                
+                }                
+            }
             return '';
         }
 
-        var pawnCount = getPawnCount(board);
         if( pawnCount[0] >= 3 && pawnCount[1] >= 3 ) {
             return '';
         }
@@ -176,6 +190,17 @@
         }
 
         return validPositions;
+    }
+
+    function isValidFromPosition(board, row, col, captures, turnIndex) {
+        var validPositions = getValidFromPositions(board, captures, turnIndex);
+        for(var i = 0; i < validPositions.length; i++) {
+            var valid = validPositions[i];
+            if(row === valid.row && col === valid.col) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function getValidToPositions(board, row, col, captures, turnIndex) {
@@ -280,8 +305,12 @@
         if( board[to_row] === undefined || board[to_row][to_col] !== '' ) {
             throw new Error("One can only make a move in an empty position.");
         }
-        if( getWinner(board, captures) !== '' || isTie(board) ) {
+        if( getWinner(board, captures, turnIndexBeforeMove) !== '' || isTie(board) ) {
             throw new Error("One can only make a move if the game is not over!");
+        }
+
+        if(!isValidFromPosition(board, from_row, from_col, captures, turnIndexBeforeMove)) {
+            throw new Error("One can only capture using one of the capturing pawns.");    
         }
 
         if( !checkMoveSteps(board, from_row, from_col, to_row, to_col, turnIndexBeforeMove) ) {
@@ -325,7 +354,7 @@
                 }
             }
 
-            var winner = getWinner(boardAfterMove, captures);
+            var winner = getWinner(boardAfterMove, captures, turnIndexBeforeMove);
             if (winner !== '' || isTie(boardAfterMove)) {
                 // Game over.
                 firstOperation = {endMatch: {endMatchScores:
@@ -640,4 +669,52 @@
         updateUI: updateUI
     });
 
+}]);;angular.module('myApp').factory('aiService',
+    ["alphaBetaService", "gameLogic",
+      function(alphaBetaService, gameLogic) {
+
+  'use strict';
+  /**
+   * Returns the move that the computer player should do for the given board.
+   * alphaBetaLimits is an object that sets a limit on the alpha-beta search,
+   * and it has either a millisecondsLimit or maxDepth field:
+   * millisecondsLimit is a time limit, and maxDepth is a depth limit.
+   */
+  function createComputerMove(board, captures, playerIndex, alphaBetaLimits) {
+    // We use alpha-beta search, where the search states are TicTacToe moves.
+    // Recal that a TicTacToe move has 3 operations:
+    // 0) endMatch or setTurn
+    // 1) {set: {key: 'board', value: ...}}
+    // 2) {set: {key: 'delta', value: ...}}]
+    return alphaBetaService.alphaBetaDecision(
+        [null, {set: {key: 'board', value: board}}, null, {set: {key: 'captures', value: captures}}],
+        playerIndex, getNextStates, getStateScoreForIndex0,
+        // If you want to see debugging output in the console, then surf to game.html?debug
+        window.location.search === '?debug' ? getDebugStateToString : null,
+        alphaBetaLimits);
+  }
+
+  function getStateScoreForIndex0(move) { // alphaBetaService also passes playerIndex, in case you need it: getStateScoreForIndex0(move, playerIndex)
+    if (move[0].endMatch) {
+      var endMatchScores = move[0].endMatch.endMatchScores;
+      return endMatchScores[0] > endMatchScores[1] ? Number.POSITIVE_INFINITY
+          : endMatchScores[0] < endMatchScores[1] ? Number.NEGATIVE_INFINITY
+          : 0;
+    }
+    return 0;
+  }
+
+  function getNextStates(move, playerIndex) {
+    var moves = gameLogic.getPossibleMoves(move[1].set.value, move[3].set.value, playerIndex);
+/*    for(var i = 0; i<moves.length; i++) {
+      prettyPrintMove(moves[i]);
+    }*/
+    return moves;
+  }
+
+  function getDebugStateToString(move) {
+    return "\n" + move[1].set.value.join("\n") + "\n";
+  }
+
+  return {createComputerMove: createComputerMove};
 }]);
