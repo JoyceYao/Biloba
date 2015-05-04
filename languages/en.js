@@ -1,3 +1,4 @@
 window.angularTranslations = {
-    BILOBA_GAME: "TicTacToe"
+	"RULES_OF_BILOBA":"Rules of Biloba",
+	"CLOSE":"Close"
 };
