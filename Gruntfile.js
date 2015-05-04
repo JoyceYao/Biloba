@@ -94,7 +94,7 @@ module.exports = function(grunt) {
             'styles/main.css',
           ],
           network: [
-            'languages/de.js',
+            'languages/en.js',
             'dist/everything.min.js.map',
             'dist/everything.js'
           ],
