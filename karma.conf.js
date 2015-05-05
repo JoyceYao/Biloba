@@ -11,7 +11,7 @@ module.exports = function(config) {
       'http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular-mocks.js',
       'src/gameLogic.js',
       'test/gameLogicSpec.js',
-      'http://yoav-zibin.github.io/emulator/alphaBetaService.js',
+      'http://yoav-zibin.github.io/emulator/dist/turnBasedServices.2.js',
       'src/aiService.js',
       'test/aiServiceSpec.js'
     ],
