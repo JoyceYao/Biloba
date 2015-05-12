@@ -10,32 +10,6 @@ describe("aiService", function() {
     _aiService = aiService;
   }));
 
-/*  function prettyPrintMove(move) {
-    var i, j, board, delta, captures, t;
-    console.log("STATE: " + JSON.stringify(move[0]));
-    console.log("BOARD:");
-    board = move[1].set.value;
-    for(i = 0; i < 9; i++) {
-      t = '';
-      for(j = 0; j < 9; j++){
-        t += board[i][j] === '' ? '   ' : ' ' + board[i][j] + ' ';
-      }
-      console.log(t);
-    }
-    console.log();
-
-    delta = move[2].set.value;
-    console.log("DELTA: [" + delta.from_row + "][" + delta.from_col + "]  -->  [" + delta.to_row + "][" + delta.to_col + "]\n");
-
-    console.log("CAPTURES: [");
-    captures = move[3].set.value;
-    for(i = 0; i < captures.length; i++) {
-      console.log("[" + captures[i].row + "][" + captures[i].col + "]\n")
-    }
-    console.log("]");
-  }*/
-
-
   it("R finds a winning move", function() {
     var move = _aiService.createComputerMove(
         [

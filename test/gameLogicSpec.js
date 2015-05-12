@@ -119,7 +119,7 @@ describe("In Biloba", function() {
 		var boardAfterMove = angular.copy(board);
 		boardAfterMove[5][7] = '';
 		boardAfterMove[3][7] = 'R';
-
+			
 		expectMoveOk(0,
 			{ board: board, delta: {from_row: 3, from_col: 7, to_row: 4, to_col: 7}, captures: [] },
 			[ {setTurn: {turnIndex : 1}},
@@ -372,5 +372,57 @@ describe("In Biloba", function() {
 			{row: 4, col: 5},
 		]);
 	});
-	
+
+	it("allows only four adjacent R\'s as valid from positions when a B is captured between them.", function() {
+		var board = _gameLogic.getInitialBoard();
+		board[4][5] = board[5][5];
+		board[5][5] = board[3][5] = '';
+		expect(_gameLogic.getValidFromPositions(board, [{row:5, col:5}], 0)).toEqual([
+			{row: 5, col: 6},
+			{row: 5, col: 4},
+			{row: 6, col: 5},
+			{row: 4, col: 5},
+		]);
+	});
+
+	it("moving R to a position that can capture a B which itself is a position of capture allows R to capture first", function() {
+		var board = getEmptyBoard();
+		board[4][1] = board[5][2] = board[6][2] = 'R';
+		board[4][2] = board[2][2] = board[4][3] = board[4][4] = 'B';
+
+		var boardAfterMove = angular.copy(board);
+		boardAfterMove[3][2] = 'R';
+		boardAfterMove[4][1] = '';
+		boardAfterMove[4][2] = '';
+
+
+		expectMoveOk(0,
+			{ board: board, captures:[] },
+			[ {setTurn: {turnIndex : 0}},
+				{set: {key: 'board', value: boardAfterMove}},
+				{set: {key: 'delta', value: {from_row: 4, from_col: 1, to_row: 3, to_col: 2} } },
+				{set: {key: 'captures', value: [{row: 4, col: 2}]}}
+			]
+		);
+	});
+
+	it("moving R to a captured position while leaving another R in a capturing position results in the capture of the R", function() {
+		var board = getEmptyBoard();
+		board[5][2] = board[5][3] = board[3][2] = 'R';
+		board[3][1] = board[3][3] = board[3][4] = 'B';
+
+		var boardAfterMove = angular.copy(board);
+		boardAfterMove[5][2] = '';
+		boardAfterMove[3][2] = '';
+		boardAfterMove[4][2] = 'R';
+
+		expectMoveOk(0,
+			{ board: board, captures:[{row: 4, col: 2}] },
+			[ {setTurn: {turnIndex : 1}},
+				{set: {key: 'board', value: boardAfterMove}},
+				{set: {key: 'delta', value: {from_row: 5, from_col: 2, to_row: 4, to_col: 2} } },
+				{set: {key: 'captures', value: [{row: 3, col: 2}] }}
+			]
+		);
+	});
 });

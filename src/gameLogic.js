@@ -200,7 +200,6 @@ angular.module('myApp', []).factory('gameLogic', function() {
     }
 
     function isCaptured(board, row, col, turnIndex) {
-
         var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ];
         var oppositePawn = getOppositePawnByTurn(turnIndex);
 
@@ -212,6 +211,37 @@ angular.module('myApp', []).factory('gameLogic', function() {
         }
 
         return false;
+    }
+
+    function checkCaptures(board, to_row, to_col, captures, turnIndex) {
+        var caps = [];
+        var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ];
+        if(captures.length > 0) {
+            for(var i = 0; i < captures.length; i++) {
+                var cap = captures[i];
+                if(isCaptured(board, cap.row, cap.col, turnIndex)) {
+                    caps.push({row: cap.row, col: cap.col});
+                }
+                for(var j = 0; j < DIRS.length; j++) {
+                    var dir = DIRS[j];
+                    var r1 = cap.row + dir.r;
+                    var r2 = cap.row - dir.r;
+                    var c1 = cap.col + dir.c;
+                    var c2 = cap.col - dir.c;
+                    if(board[r1][c1] === getPawnByTurn(turnIndex) && isCaptured(board, r1, c1, turnIndex)) {
+                        caps.push({row: r1, col: c1});
+                    }
+                    else if(board[r2][c2] === getPawnByTurn(turnIndex) && isCaptured(board, r2, c2, turnIndex)) {
+                        caps.push({row: r2, col: c2});
+                    }
+                }
+
+            }
+        }
+        else if(isCaptured(board, to_row, to_col, turnIndex)) {
+            caps.push({row: to_row, col: to_col});
+        }
+        return caps;
     }
 
     function willCapture(board, row, col, turnIndex) {
@@ -275,30 +305,32 @@ angular.module('myApp', []).factory('gameLogic', function() {
 
         var boardAfterMove = angular.copy(board),
             changeTurn = false,
-            firstOperation = {};
+            firstOperation = {}, i;
 
-        captures = [];
         boardAfterMove[from_row][from_col] = '';
-
-        if(!(to_row === 4 && to_col === 4)) { 
-
-            if(isCaptured(board, to_row, to_col, turnIndexBeforeMove)) {
+        var canCapture = willCapture(boardAfterMove, to_row, to_col, turnIndexBeforeMove);
+        var newCaptures = checkCaptures(boardAfterMove, to_row, to_col, captures, turnIndexBeforeMove);
+        captures = [];
+        if(!(to_row === 4 && to_col === 4)) {
+            boardAfterMove[to_row][to_col] = turnPawn;
+            if(newCaptures.length > 0 && canCapture.length === 0) {
                 /** 
                  * If the move results in capture of the moved pawn, remove it from
                  * the board and change turn.
                  */
-                boardAfterMove[to_row][to_col] = '';
-                captures = [ {row: to_row, col: to_col} ];
+                for(i = 0; i < newCaptures.length; i++) {
+                    boardAfterMove[newCaptures[i].row][newCaptures[i].col] = '';
+                }
+                captures = newCaptures;
                 changeTurn = true;
             }
             else {
-                boardAfterMove[to_row][to_col] = turnPawn;
-                captures = willCapture(boardAfterMove, to_row, to_col, turnIndexBeforeMove);
+                captures = canCapture;
                 if( captures.length === 0 ) {
                     changeTurn = true;
                 }
                 else {
-                    for(var i = 0; i < captures.length; i++) {
+                    for(i = 0; i < captures.length; i++) {
                         var cap = captures[i];
                         boardAfterMove[cap.row][cap.col] = '';
                     }
@@ -345,11 +377,10 @@ angular.module('myApp', []).factory('gameLogic', function() {
 
             var expectedMove = createMove(board, from_row, from_col, to_row, to_col, captures, turnIndexBeforeMove);
             if (!angular.equals(move, expectedMove)) {
-                //console.log(move[1], expectedMove[1]);
                 return false;
             }
         } catch (e) {
-           // console.log(e.message);
+            //console.log(e.message);
             // if there are any exceptions then the move is illegal
             return false;
         }
