@@ -9,6 +9,8 @@ module.exports = function(config) {
     files : [
       'http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular.js',
       'http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular-mocks.js',
+      'http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular-touch.min.js',
+      'http://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.min.js',
       'src/gameLogic.js',
       'test/gameLogicSpec.js',
       'http://yoav-zibin.github.io/emulator/dist/turnBasedServices.2.js',
