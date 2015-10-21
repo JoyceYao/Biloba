@@ -1,4 +1,4 @@
-angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', function() {
+angular.module('myApp', ['ngTouch', 'ui.bootstrap', 'gameServices']).factory('gameLogic', function() {
 
     'use strict';
 
@@ -55,8 +55,8 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', functi
                 for(var i = 0; i < captures.length; i++) {
                     if(!isCaptured(board, captures[i].row, captures[i].col, turnIndex)) {
                         return getPawnByTurn(turnIndex);
-                    }                
-                }                
+                    }
+                }
             }
             return '';
         }
@@ -115,8 +115,8 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', functi
 
                 if( board[pRow] && board[pRow][pCol] === turnPawn && board[nRow] && board[nRow][nCol] === turnPawn ) {
                     validPositions.push({row: pRow, col: pCol}, {row: nRow, col: nCol});
-                }                
-            }            
+                }
+            }
         }
         return validPositions;
     }
@@ -131,7 +131,7 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', functi
         else if(captures.length > 0) {
             return getValidFromPositionsOnCapture(board, captures, turnIndex);
         }
-        
+
         for( var i = 0; i < 9; i++ ) {
             for( var j = 0; j < 9; j++ ) {
                 if(board[i][j] === turnPawn) {
@@ -181,7 +181,7 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', functi
                 if(board[jump_row] && board[jump_row][jump_col] === getOppositePawnByTurn(turnIndex)) {
                     return true;
                 }
-                return false;                
+                return false;
             }
             return false;
         }
@@ -252,7 +252,7 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', functi
 
         for(i = 0; i < DIRS.length; i++ ){
             dir = DIRS[i];
-            if( board[row + dir.r] && board[row + dir.r][col + dir.c] === oppositePawn && 
+            if( board[row + dir.r] && board[row + dir.r][col + dir.c] === oppositePawn &&
                 board[row + 2 * dir.r] && board[row + 2 * dir.r][col + 2 * dir.c] === turnPawn ) {
                 captures.push({row: row + dir.r, col: col + dir.c});
             }
@@ -260,7 +260,7 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', functi
 
         for(i = 0; i < DIRS.length; i++ ){
             dir = DIRS[i];
-            if( board[row - dir.r] && board[row - dir.r][col - dir.c] === oppositePawn && 
+            if( board[row - dir.r] && board[row - dir.r][col - dir.c] === oppositePawn &&
                 board[row - 2 * dir.r] && board[row - 2 * dir.r][col - 2 * dir.c] === turnPawn ) {
                 captures.push({row: row - dir.r, col: col - dir.c});
             }
@@ -291,13 +291,13 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', functi
         }
 
         if(!isValidFromPosition(board, from_row, from_col, captures, turnIndexBeforeMove)) {
-            throw new Error("One can only capture using one of the capturing pawns.");    
+            throw new Error("One can only capture using one of the capturing pawns.");
         }
 
         if( !checkMoveSteps(board, from_row, from_col, to_row, to_col, turnIndexBeforeMove) ) {
             throw new Error("One can only make a one step move or jump once over opponent's pawn.");
         }
-      
+
         if( captures && captures.length > 0 && !checkMoveOnCapture(board, to_row, to_col, captures) ) {
             throw new Error("One can only move a pawn to a captured pawn.");
         }
@@ -314,7 +314,7 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', functi
         if(!(to_row === 4 && to_col === 4)) {
             boardAfterMove[to_row][to_col] = turnPawn;
             if(newCaptures.length > 0 && canCapture.length === 0) {
-                /** 
+                /**
                  * If the move results in capture of the moved pawn, remove it from
                  * the board and change turn.
                  */
@@ -347,7 +347,7 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap']).factory('gameLogic', functi
                 firstOperation = {setTurn: {turnIndex: 1 - turnIndexBeforeMove}};
             }
             else {
-                firstOperation = {setTurn: {turnIndex: turnIndexBeforeMove}};    
+                firstOperation = {setTurn: {turnIndex: turnIndexBeforeMove}};
             }
         }
         else {

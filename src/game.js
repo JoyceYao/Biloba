@@ -1,11 +1,7 @@
 angular.module('myApp')
   .controller('gameController',
-      ['$rootScope', '$scope', '$log', '$timeout',
-       'gameService', 'stateService', 'gameLogic', 'aiService',
-       'resizeGameAreaService', '$translate', 'dragAndDropService',
-      function ($rootScope, $scope, $log, $timeout,
-        gameService, stateService, gameLogic, aiService,
-        resizeGameAreaService, $translate, dragAndDropService ) {
+      ['$rootScope', '$scope', '$log', '$timeout', 'gameLogic',
+      function ($rootScope, $scope, $log, $timeout, gameLogic) {
 
     'use strict';
 
@@ -42,7 +38,7 @@ angular.module('myApp')
             var from = dragStartPos;
             var to = {row: row, col: col};
             dragDone(from, to);
-        } 
+        }
         else {
             /**
              * Continue dragging.
@@ -56,7 +52,7 @@ angular.module('myApp')
              */
             if(dragSet) {
                /**
-                * If drag results in valid move, hide and reset piece after some time to avoid animation. 
+                * If drag results in valid move, hide and reset piece after some time to avoid animation.
                 */
                 setTimeout(function(){
                     dragEl.style.display = 'none';
@@ -69,7 +65,7 @@ angular.module('myApp')
             else {
                 dragEl.style.left = '';
                 dragEl.style.top = '';
-                dragEl = null;                
+                dragEl = null;
             }
             dragStartPos = null;
         }
@@ -124,9 +120,9 @@ angular.module('myApp')
 
         $scope.validFromPositions = gameLogic.getValidFromPositions($scope.board, $scope.captures, params.turnIndexAfterMove);
         if($scope.selectedBlock && $scope.selectedBlock.row === 4 && $scope.selectedBlock.col === 4) {
-            $scope.validToPositions = gameLogic.getValidToPositions($scope.board, 4, 4, $scope.captures, $scope.turnIndex);                        
+            $scope.validToPositions = gameLogic.getValidToPositions($scope.board, 4, 4, $scope.captures, $scope.turnIndex);
         }
-        
+
         $scope.isYourTurn = params.turnIndexAfterMove >= 0 && // game is ongoing
         params.yourPlayerIndex === params.turnIndexAfterMove; // it's my turn
         $scope.turnIndex = params.turnIndexAfterMove;
@@ -162,7 +158,7 @@ angular.module('myApp')
         if(!$scope.isYourTurn) {
             return false;
         }
-        
+
         if (window.location.search === '?throwException') { // to test encoding a stack trace with sourcemap
             throw new Error("Throwing the error because URL has '?throwException'");
         }
@@ -189,10 +185,10 @@ angular.module('myApp')
                 } catch (e) {
                     $log.info(["Cell is already full in position:", row, col]);
                     return false;
-                }                
+                }
             }
         }
-        return true;     
+        return true;
     }
 
     $scope.getBlockClass = function(row, col) {
@@ -225,7 +221,7 @@ angular.module('myApp')
                         classes.push('validTo');
                         break;
                     }
-                }                
+                }
             }
 
             for(i = 0; i < $scope.captures.length; i++) {
