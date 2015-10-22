@@ -3,6 +3,10 @@ module game {
     top: number;
     left: number;
   }
+  interface IWidthHeight {
+    width: number;
+    height: number;
+  }
   let selectedBlock: IPosition = null;
   let validFromPositions: IPosition[] = [];
   let validToPositions: IPosition[] = [];
@@ -33,7 +37,7 @@ module game {
     })
   }
 
-  function handleDrag(type: string, cx: number, cy: number) {
+  function handleDrag(type: string, cx: number, cy: number): void {
     var size = getSquareWidthHeight();
     var x = Math.min(Math.max(cx - gameArea.offsetLeft, 0), gameArea.clientWidth - size.width);
     var y = Math.min(Math.max(cy - gameArea.offsetTop, 0), gameArea.clientHeight - size.height);
@@ -99,7 +103,7 @@ module game {
     dragEl.style.top = topLeft.top - originalSize.top + 0.15 * squareSize.height +  "px";
   }
 
-  function getSquareWidthHeight() {
+  function getSquareWidthHeight(): IWidthHeight {
     return {
       width: gameArea.clientWidth / numCols,
       height: gameArea.clientHeight / numRows
@@ -111,7 +115,7 @@ module game {
     return {top: row * size.height, left: col * size.width};
   }
 
-  function dragDone(from: IPosition, to: IPosition) {
+  function dragDone(from: IPosition, to: IPosition): void {
     selectCell(to.row, to.col);
     $rootScope.$apply();
   }
@@ -121,7 +125,7 @@ module game {
     gameService.makeMove(items[Math.floor(Math.random()*items.length)]);
   }
 
-  function updateUI(params: IUpdateUI) {
+  function updateUI(params: IUpdateUI): void {
     board = params.stateAfterMove.board;
     delta = params.stateAfterMove.delta;
     captures = params.stateAfterMove.captures || [];

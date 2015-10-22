@@ -18,6 +18,8 @@ var aiService;
     }
     aiService.createComputerMove = createComputerMove;
     function getStateScoreForIndex0(move) {
+        // alphaBetaService also passes playerIndex,
+        // in case you need it: getStateScoreForIndex0(move, playerIndex)
         if (move[0].endMatch) {
             var endMatchScores = move[0].endMatch.endMatchScores;
             return endMatchScores[0] > endMatchScores[1] ? Number.POSITIVE_INFINITY

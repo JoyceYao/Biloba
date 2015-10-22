@@ -87,7 +87,8 @@ module gameLogic {
     }
   }
 
-  function getValidMoves(board: Board, row: number, col: number, captures: IPosition[], turnIndex: number): IMove[] {
+  function getValidMoves(board: Board, row: number, col: number,
+    captures: IPosition[], turnIndex: number): IMove[] {
     var valid: IMove[] = [];
     var rMin = Math.max(row - 2, 0), rMax = Math.min(row + 2, 8);
     var cMin = Math.max(col - 2, 0), cMax = Math.min(col + 2, 8);
@@ -102,7 +103,8 @@ module gameLogic {
     return valid;
   }
 
-  export function getPossibleMoves(board: Board, captures: IPosition[], turnIndex: number): IMove[] {
+  export function getPossibleMoves(board: Board, captures: IPosition[],
+      turnIndex: number): IMove[] {
     var possibleMoves: IMove[] = [];
     var turnPawn = getPawnByTurn(turnIndex);
     for (var i = 0; i < 9; i++) {
@@ -115,7 +117,8 @@ module gameLogic {
     return possibleMoves;
   }
 
-  function getValidFromPositionsOnCapture(board: Board, captures: IPosition[], turnIndex: number): IPosition[] {
+  function getValidFromPositionsOnCapture(board: Board, captures: IPosition[],
+      turnIndex: number): IPosition[] {
     var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ];
     var validPositions: IPosition[] = [];
     var turnPawn = getPawnByTurn(turnIndex);
@@ -127,7 +130,8 @@ module gameLogic {
         pRow = row + dir.r, pCol = col + dir.c,
         nRow = row - dir.r, nCol = col - dir.c;
 
-        if (board[pRow] && board[pRow][pCol] === turnPawn && board[nRow] && board[nRow][nCol] === turnPawn) {
+        if (board[pRow] && board[pRow][pCol] === turnPawn
+          && board[nRow] && board[nRow][nCol] === turnPawn) {
           validPositions.push({row: pRow, col: pCol}, {row: nRow, col: nCol});
         }
       }
@@ -135,7 +139,8 @@ module gameLogic {
     return validPositions;
   }
 
-  export function getValidFromPositions(board: Board, captures: IPosition[], turnIndex: number): IPosition[] {
+  export function getValidFromPositions(board: Board, captures: IPosition[],
+      turnIndex: number): IPosition[] {
     var turnPawn = getPawnByTurn(turnIndex);
     var validPositions: IPosition[] = [];
 
@@ -155,7 +160,8 @@ module gameLogic {
     return validPositions;
   }
 
-  function isValidFromPosition(board: Board, row: number, col: number, captures: IPosition[], turnIndex: number): boolean {
+  function isValidFromPosition(board: Board, row: number, col: number,
+      captures: IPosition[], turnIndex: number): boolean {
     var validPositions = getValidFromPositions(board, captures, turnIndex);
     for (var i = 0; i < validPositions.length; i++) {
       var valid = validPositions[i];
@@ -166,7 +172,8 @@ module gameLogic {
     return false;
   }
 
-  export function getValidToPositions(board: Board, row: number, col: number, captures: IPosition[], turnIndex: number): IPosition[] {
+  export function getValidToPositions(board: Board, row: number, col: number,
+      captures: IPosition[], turnIndex: number): IPosition[] {
     // Assuming {row, col} is a valid from position.
     var valid = getValidMoves(board, row, col, captures, turnIndex);
     var validPositions: IPosition[] = [];
@@ -178,7 +185,8 @@ module gameLogic {
     return validPositions;
   }
 
-  function checkMoveSteps(board: Board, from_row: number, from_col: number, to_row: number, to_col: number, turnIndex: number): boolean {
+  function checkMoveSteps(board: Board, from_row: number, from_col: number,
+      to_row: number, to_col: number, turnIndex: number): boolean {
     var row_delta = to_row - from_row,
         col_delta = to_col - from_col,
         row_delta_dir = row_delta === 0 ? 0 : row_delta/Math.abs(row_delta),
@@ -199,7 +207,8 @@ module gameLogic {
     return true;
   }
 
-  function checkMoveOnCapture(board: Board, to_row: number, to_col: number, captures: IPosition[]): boolean {
+  function checkMoveOnCapture(board: Board, to_row: number, to_col: number,
+      captures: IPosition[]): boolean {
     for (var i = 0; i < captures.length; i++) {
       var capture = captures[i];
       if (to_row === capture.row && to_col === capture.col) {
@@ -223,7 +232,8 @@ module gameLogic {
     return false;
   }
 
-  function checkCaptures(board: Board, to_row: number, to_col: number, captures: IPosition[], turnIndex: number): IPosition[] {
+  function checkCaptures(board: Board, to_row: number, to_col: number,
+    captures: IPosition[], turnIndex: number): IPosition[] {
     var caps: IPosition[] = [];
     var DIRS = [ { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 1, c: 0 }, { r: 1, c: -1 } ];
     if (captures.length > 0) {
@@ -238,9 +248,11 @@ module gameLogic {
           var r2 = cap.row - dir.r;
           var c1 = cap.col + dir.c;
           var c2 = cap.col - dir.c;
-          if (board[r1][c1] === getPawnByTurn(turnIndex) && isCaptured(board, r1, c1, turnIndex)) {
+          if (board[r1][c1] === getPawnByTurn(turnIndex)
+            && isCaptured(board, r1, c1, turnIndex)) {
             caps.push({row: r1, col: c1});
-          } else if (board[r2][c2] === getPawnByTurn(turnIndex) && isCaptured(board, r2, c2, turnIndex)) {
+          } else if (board[r2][c2] === getPawnByTurn(turnIndex)
+            && isCaptured(board, r2, c2, turnIndex)) {
             caps.push({row: r2, col: c2});
           }
         }
@@ -275,7 +287,8 @@ module gameLogic {
     return captures;
   }
 
-  export function createMove(board: Board, from_row: number, from_col: number, to_row: number, to_col: number, captures: IPosition[], turnIndexBeforeMove: number): IMove {
+  export function createMove(board: Board, from_row: number, from_col: number,
+    to_row: number, to_col: number, captures: IPosition[], turnIndexBeforeMove: number): IMove {
     if (board === undefined) {
       board = getInitialBoard();
     }
@@ -359,7 +372,8 @@ module gameLogic {
 
     return [firstOperation,
       {set: {key: 'board', value: boardAfterMove}},
-      {set: {key: 'delta', value: { from_row: from_row, from_col: from_col, to_row: to_row, to_col: to_col } } },
+      {set: {key: 'delta', value: { from_row: from_row, from_col: from_col,
+                                    to_row: to_row, to_col: to_col } } },
       {set: {key: 'captures', value: captures } } ];
   }
 

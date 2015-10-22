@@ -5,7 +5,8 @@ module aiService {
    * and it has either a millisecondsLimit or maxDepth field:
    * millisecondsLimit is a time limit, and maxDepth is a depth limit.
    */
-  export function createComputerMove(board: Board, captures: ICapture[], playerIndex: number, alphaBetaLimits: number): IMove {
+  export function createComputerMove(board: Board, captures: IPosition[],
+    playerIndex: number, alphaBetaLimits: number): IMove {
     // We use alpha-beta search, where the search states are TicTacToe moves.
     // Recal that a TicTacToe move has 3 operations:
     // 0) endMatch or setTurn
@@ -19,7 +20,9 @@ module aiService {
         alphaBetaLimits);
   }
 
-  function getStateScoreForIndex0(move: IMove): number { // alphaBetaService also passes playerIndex, in case you need it: getStateScoreForIndex0(move, playerIndex)
+  function getStateScoreForIndex0(move: IMove): number {
+    // alphaBetaService also passes playerIndex,
+    // in case you need it: getStateScoreForIndex0(move, playerIndex)
     if (move[0].endMatch) {
       var endMatchScores = move[0].endMatch.endMatchScores;
       return endMatchScores[0] > endMatchScores[1] ? Number.POSITIVE_INFINITY

@@ -101,7 +101,8 @@ var gameLogic;
             var row = captures[j].row, col = captures[j].col;
             for (var i = 0; i < DIRS.length; i++) {
                 var dir = DIRS[i], pRow = row + dir.r, pCol = col + dir.c, nRow = row - dir.r, nCol = col - dir.c;
-                if (board[pRow] && board[pRow][pCol] === turnPawn && board[nRow] && board[nRow][nCol] === turnPawn) {
+                if (board[pRow] && board[pRow][pCol] === turnPawn
+                    && board[nRow] && board[nRow][nCol] === turnPawn) {
                     validPositions.push({ row: pRow, col: pCol }, { row: nRow, col: nCol });
                 }
             }
@@ -198,10 +199,12 @@ var gameLogic;
                     var r2 = cap.row - dir.r;
                     var c1 = cap.col + dir.c;
                     var c2 = cap.col - dir.c;
-                    if (board[r1][c1] === getPawnByTurn(turnIndex) && isCaptured(board, r1, c1, turnIndex)) {
+                    if (board[r1][c1] === getPawnByTurn(turnIndex)
+                        && isCaptured(board, r1, c1, turnIndex)) {
                         caps.push({ row: r1, col: c1 });
                     }
-                    else if (board[r2][c2] === getPawnByTurn(turnIndex) && isCaptured(board, r2, c2, turnIndex)) {
+                    else if (board[r2][c2] === getPawnByTurn(turnIndex)
+                        && isCaptured(board, r2, c2, turnIndex)) {
                         caps.push({ row: r2, col: c2 });
                     }
                 }
@@ -308,7 +311,8 @@ var gameLogic;
         }
         return [firstOperation,
             { set: { key: 'board', value: boardAfterMove } },
-            { set: { key: 'delta', value: { from_row: from_row, from_col: from_col, to_row: to_row, to_col: to_col } } },
+            { set: { key: 'delta', value: { from_row: from_row, from_col: from_col,
+                        to_row: to_row, to_col: to_col } } },
             { set: { key: 'captures', value: captures } }];
     }
     gameLogic.createMove = createMove;
