@@ -13,7 +13,7 @@ module.exports = function(config) {
       'http://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.min.js',
       'src/gameLogic.js',
       'test/gameLogicSpec.js',
-      'http://yoav-zibin.github.io/emulator/dist/turnBasedServices.2.js',
+      'http://yoav-zibin.github.io/emulator/dist/turnBasedServices.3.js',
       'src/aiService.js',
       'test/aiServiceSpec.js'
     ],
