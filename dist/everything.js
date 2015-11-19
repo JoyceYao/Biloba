@@ -400,7 +400,8 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap', 'gameServices']).factory('ga
         getValidFromPositions: getValidFromPositions,
         getValidToPositions: getValidToPositions,
     };
-});;angular.module('myApp')
+});
+;angular.module('myApp')
   .controller('gameController',
       ['$rootScope', '$scope', '$log', '$timeout', 'gameLogic',
       function ($rootScope, $scope, $log, $timeout, gameLogic) {
@@ -652,7 +653,8 @@ angular.module('myApp', ['ngTouch', 'ui.bootstrap', 'gameServices']).factory('ga
         updateUI: updateUI
     });
 
-}]);;angular.module('myApp').factory(
+}]);
+;angular.module('myApp').factory('aiService',
     ["alphaBetaService", "gameLogic",
       function(alphaBetaService, gameLogic) {
 

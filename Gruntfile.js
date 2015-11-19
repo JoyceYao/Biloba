@@ -65,6 +65,8 @@ module.exports = function(grunt) {
             'dist/everything.min.js',
             'imgs/ico_help.png',
             'styles/main.css',
+            'imgs/200x200.png',
+            'imgs/50x50.png'
           ],
           network: [
             'languages/en.js',
@@ -108,9 +110,9 @@ module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
 
   // Default task(s).
-  grunt.registerTask('default', ['karma',
-      'concat', 'uglify',
-      'processhtml', 'manifest',
-      'http-server', 'protractor']);
+  grunt.registerTask('default', [   //'karma',  'protractor',
+      'concat', 'uglify', 'processhtml',
+      'manifest',
+      'http-server']);
 
 };
