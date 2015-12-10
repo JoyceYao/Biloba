@@ -215,7 +215,7 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', [   //'karma', 'protractor',
-  	  'shell',
+  	  //'shell',
       'concat', 'uglify', 'processhtml',
       'manifest',
       'http-server']);
