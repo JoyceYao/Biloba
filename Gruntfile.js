@@ -19,6 +19,7 @@ module.exports = function(grunt) {
     "50x50",
     "200x200",
     "320x50",
+    "320x320",
     "android/7inTablet-615x984",
     "android/10inTablet-656x1048",
     "android/Phone-656x1054",
@@ -28,6 +29,7 @@ module.exports = function(grunt) {
     "ios/iphone5-4inch-640x1096",
     "ios/iphone6-4.7inch-750x1334",
     "ios/iphone6plus-5.5inch-1242x2208",
+    "ios/icon-1024x1024",
     "phonegap/icon-29",
     "phonegap/icon-40",
     "phonegap/icon-57",
@@ -55,7 +57,6 @@ module.exports = function(grunt) {
     "phonegap/splash-512x512",
   ];
   var commands = [];
-  var commands2 = [];
   var subdirectories = {};
   commands.push('rmdir /s/q ' + output_directory);
   commands.push('mkdir ' + output_directory);
@@ -82,13 +83,15 @@ module.exports = function(grunt) {
     }
 
     var fileName = desired_size.replace('/', '\\') + '.png';
+    // IOS images cannot be transparent
+    var transparentStr = fileName.startsWith("ios") ? '' : ' -background transparent' ;
 
     // create resized pictures in temp folders
     var commandStr = 'convert ' + directory + '\\' + src_img +
         ' -resize ' + width + 'x' + height +
         ' -size ' + width + 'x' + height +
         ' -gravity center' + 			// put the image in the vertical and horizontal center
-        ' -background transparent' + 	// make background transparent
+        transparentStr + 			 	// make background transparent  ' -background transparent' +
         ' -extent ' + dimensions +		// force the image to fit the require pixel size
         ' -quality 75' +   				// compress the image
         ' ' + output_directory + '\\' + fileName;
@@ -96,13 +99,13 @@ module.exports = function(grunt) {
     console.log("make command=" + commandStr);
     commands.push(commandStr);
   }
-  var auto_resize_images_command = commands.join(" & ");  
+  var auto_resize_images_command = commands.join(" & ");
 
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     shell: {
-       auto_resize_images_on_mac: {
+       auto_resize_images_on_win: {
          command: auto_resize_images_command
        }
     },
@@ -215,7 +218,7 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', [   //'karma', 'protractor',
-  	  //'shell',
+  	  'shell',
       'concat', 'uglify', 'processhtml',
       'manifest',
       'http-server']);
